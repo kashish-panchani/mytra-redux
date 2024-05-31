@@ -254,9 +254,9 @@ const Cart = () => {
                         </p>
                         <div className="flex justify-between items-center">
                           <span className="flex justify-center items-center sm:text-[11px] text-[11px] font-bold text-gray-800">
-                            ₹{parseInt(item?.price - ((item?.price * item?.discountPercentage) / 100))}
+                            ${parseInt(item?.price - ((item?.price * item?.discountPercentage) / 100))}
                             <p className="text-[10px] mx-1 sm:text-[11px] sm:mx-2 line-through text-slate-400">
-                              ₹{parseInt(item?.price)}
+                              ${parseInt(item?.price)}
                             </p>
                             <p className="text-[9px] sm:text-[11px] leading-relaxed text-orange-300">
                               ({parseInt(item?.discountPercentage)}% off)

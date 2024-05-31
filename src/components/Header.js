@@ -103,7 +103,7 @@ const Header = () => {
                     <li key={index}>
                       <Link
                         to={el.url}
-                        className={`block py-2 px-3 rounded md:bg-transparent md:text-gray-900 md:p-0 ${location.pathname === el.url ? "bg-gray-400" : ""
+                        className={`block py-2 px-3 rounded md:bg-transparent hover:underline md:text-gray-900 md:p-0 ${location.pathname === el.url ? "bg-gray-400" : ""
                           }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >

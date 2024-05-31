@@ -70,10 +70,10 @@ const ProductItems = (props) => {
                     <div className="flex justify-between mt-2">
                       <div className="flex items-center">
                         <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                          ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                          ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
                         </span>
                         <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                          ₹{parseInt(product.price)}
+                          ${parseInt(product.price)}
                         </span>
                         <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
                           ({parseInt(product.discountPercentage)}% off)
@@ -170,10 +170,10 @@ const ProductItems = (props) => {
                   </div>
                   <div className="flex items-center">
                     <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                      ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                      ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
                     </span>
                     <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                      ₹{parseInt(product.price)}
+                      ${parseInt(product.price)}
                     </span>
                     <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
                       ({parseInt(product.discountPercentage)}% off)
@@ -192,10 +192,10 @@ const ProductItems = (props) => {
                   </Link>
                   <div className="flex items-center">
                     <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                      ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                      ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
                     </span>
                     <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                      ₹{parseInt(product.price)}
+                      ${parseInt(product.price)}
                     </span>
                     <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
                       ({parseInt(product.discountPercentage)}% off)

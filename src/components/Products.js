@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { getProducts, getSortedProduct, getWishlistProduct } from "../redux/actions";
 
 const Products = () => {
-
   const [currentPage, setCurrentPage] = useState(1);
   const [isHover, setIshover] = useState(false);
   const [hoverSetProduct, setHoverSetProduct] = useState(null);
@@ -200,13 +199,13 @@ const Products = () => {
                       <div className="flex justify-between mt-2">
                         <div className="flex items-center">
                           <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                            ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                            ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
                           </span>
                           <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                            ₹{parseInt(product.price)}
+                          ${parseInt(product.price)}
                           </span>
                           <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
-                            ({parseInt(product.discountPercentage)}% off)
+                          ({parseInt(product.discountPercentage)}% off)
                           </span>
                         </div>
                       </div>
@@ -324,10 +323,11 @@ const Products = () => {
                     </Link>
                     <div className="flex items-center">
                       <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                        ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                        ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
                       </span>
                       <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                        ₹{parseInt(product.price)}
+                        
+                        ${parseInt(product.price)}
                       </span>
                       <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
                         ({parseInt(product.discountPercentage)}% off)

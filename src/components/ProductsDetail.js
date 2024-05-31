@@ -153,16 +153,15 @@ const ProductsDetail = () => {
 
           <div className="flex items-center my-1 xl:text-2xl   font-bold text-black">
             <p className="xl:text-2xl lg:text-lg md:text-sm sm:text-sm text-xs font-bold">
-              ₹
+              $
               {parseInt(products.price -
                 (
                   (products.price * products.discountPercentage) /
                   100
                 ))}
             </p>
-            {/* ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))} */}
             <p className="text-xs xl:text-xl lg:text-base md:text-sm sm:text-sm opacity-40 font-normal px-2 leading-relaxed line-through">
-              ₹{parseInt(products.price)}
+              ${parseInt(products.price)}
             </p>
             <span className="opacity-40 text-xs  xl:text-xl lg:text-sm  md:text-sm sm:text-sm font-normal">
               {" "}
