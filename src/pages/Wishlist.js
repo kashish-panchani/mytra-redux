@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import imagelogin from "../Images/login/login.png";
 import { useDispatch, useSelector } from "react-redux";
-import { getCartItems, getWishlistProduct, moveToCart } from "../redux/actions";
+import { getCartItems, getSelectProductId, getWishlistProduct, moveToCart } from "../redux/actions";
 const Wishlist = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { wishlist, cartItems } = useSelector(state => state.Reducer)
@@ -117,29 +117,32 @@ const Wishlist = () => {
                           src={product.images[0]}
                           alt="product image"
                           loading="lazy"
+                          onClick={()=>dispatch(getSelectProductId(product.id))}
                         />
                       </Link>
-                      <div className="mt-6 sm:px-5 w-full sm:pb-5">
+                      <div className="mt-6 p-1 sm:px-5 w-full sm:pb-5">
                         <a href="#">
-                          <h5 className="capitalize text-sm  pl-4 sm:pl-0  tracking-tight line-clamp-1 text-gray-500">
+                          <h5 className="capitalize text-xs sm:text-sm  sm:pl-0  tracking-tight line-clamp-1 text-gray-500">
                             {product.title}
                           </h5>
                         </a>
-                        <div className="sm:mt-2 pl-4 sm:pl-0 mb-2 sm:mb-5  flex items-center justify-between">
+                        <div className="sm:mt-2 sm:pl-0 mb-2 sm:mb-5 flex items-center justify-between">
                           <p>
-                            <span className="text-[10px] sm:text-sm  font-bold leading-relaxed">
-                              ₹{parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
+                            <span className="text-[8px] sm:text-[11px] font-bold leading-relaxed">
+                              ${(product.price - (product.price * (product.discountPercentage / 100))).toFixed(2)}
                             </span>
-
-                            <span className="font-semibold text-[10px] sm:text-xs mx-2 line-through text-gray-400">
-                              ₹{parseInt(product.price)}
-                            </span>
-                            <span className=" text-[11px] leading-relaxed  sm:font-bold text-orange-300">
-                              ({parseInt(product.discountPercentage)}% off)
-                            </span>
+                            {product.discountPercentage >= 1 && (
+                              <>
+                                <span className="font-semibold text-[8px] sm:text-[10px] mx-2 line-through text-gray-400">
+                                  ${(product.price)}
+                                </span>
+                                <span className="text-[8px] sm:text-[10px] leading-relaxed sm:font-bold text-orange-300">
+                                  ({(product.discountPercentage)}% off)
+                                </span>
+                              </>
+                            )}
                           </p>
                         </div>
-
 
                         <span
                           className="flex items-center justify-center border-t sm:border sm:bg-slate-900 px-5 py-3 sm:py-2.5  text-sm font-medium text-rose-500 sm:text-white  hover:sm:bg-gray-700 focus:outline-none focus:ring-4 sm:focus:ring-blue-300"

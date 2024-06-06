@@ -4,7 +4,8 @@ import Slider from "react-slick";
 import { settings } from "../Constants/ProductSlider.js";
 import useToast from "../hook/useToast.js";
 import { useDispatch, useSelector } from "react-redux";
-import { getProducts, getSortedProduct, getWishlistProduct } from "../redux/actions.js";
+import { fetchProducts, getSelectProductId, getSortedProduct, getWishlistProduct } from "../redux/actions.js";
+import Spinner from "../Spinner.js";
 
 const Category = () => {
   const { type } = useParams();
@@ -13,7 +14,7 @@ const Category = () => {
   const [filterCategoryProducts, setfilterCategoryProducts] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedSortOption, setSelectedSortOption] = useState("default");
-  const { products, wishlist, sortedProduct } = useSelector(state => state.Reducer)
+  const { products, wishlist, sortedProduct,isFetchProductsLoading } = useSelector(state => state.Reducer)
   const { success, error } = useToast();
   const dispatch = useDispatch()
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -22,13 +23,8 @@ const Category = () => {
 
   const navigate = useNavigate();
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch(`https://dummyjson.com/products?limit=0`);
-      const data = await response.json();
-      dispatch(getProducts(data.products))
-    };
-    fetchData();
-  }, [dispatch]);
+    dispatch(fetchProducts());
+  }, []);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -68,7 +64,7 @@ const Category = () => {
             (b.price * b.discountPercentage) / 100 -
             (a.price - (a.price * a.discountPercentage) / 100)
         )))
-       
+
         break;
       case "price_low_to_high":
         dispatch(getSortedProduct([...filterCategoryProducts].sort(
@@ -93,7 +89,6 @@ const Category = () => {
 
 
   useEffect(() => {
-    // const category = products?.filter((product) => product?.category === type);
     const category = Array.isArray(products) ? products.filter((product) => product?.category === type) : [];
 
     setfilterCategoryProducts(category);
@@ -135,7 +130,9 @@ const Category = () => {
       }
     }
   };
-
+  if (isFetchProductsLoading) {
+    return <Spinner />
+  }
   return (
     <>
       <div className="sm:container sm:mx-auto pt-16 sm:pt-20 pb-10">
@@ -172,10 +169,11 @@ const Category = () => {
                           src={product.images[0]}
                           alt={product.title}
                           className="w-full h-32 sm:h-44 object-contain"
+                          onClick={()=>dispatch(getSelectProductId(product.id))}
                         />
                       </div>
                     </Link>
-                    <div className="p-4">
+                    <div className="p-1">
                       <h2 className="text-xs sm:text-lg font-bold line-clamp-1 text-gray-800">
                         {product.title}
                       </h2>
@@ -183,17 +181,24 @@ const Category = () => {
                         {product.description}
                       </p>
 
-                      <div className="flex justify-between mt-2">
-                        <div className="flex items-center">
-                          <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                            ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
-                          </span>
-                          <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                            ${parseInt(product.price)}
-                          </span>
-                          <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
-                            ({parseInt(product.discountPercentage)}% off)
-                          </span>
+                      <div className="flex justify-between mt-0 sm:mt-2">
+                        <div className="mb-2 sm:mb-5 flex items-center justify-between">
+                          <p>
+                            <span className="text-[8px] sm:text-sm font-bold leading-relaxed">
+                              ${(product.price - (product.price * (product.discountPercentage / 100))).toFixed(2)}
+
+                            </span>
+                            {product.discountPercentage >= 1 && (
+                              <>
+                                <span className="font-semibold text-[8px] sm:text-xs mx-2 line-through text-gray-400">
+                                  ${(product.price)}
+                                </span>
+                                <span className="text-[8px] sm:text-xs sm:mt-0  mt-4 leading-relaxed sm:font-bold text-orange-300">
+                                  ({(product.discountPercentage)}% off)
+                                </span>
+                              </>
+                            )}
+                          </p>
                         </div>
                         {/* Wishlist button for mobile*/}
                         <div className="rounded-full cursor-pointer text-center px-1">
@@ -223,7 +228,7 @@ const Category = () => {
               <div
                 key={product.id}
                 className="sm:p-0 bg-white sm:rounded-lg hover:shadow-xl overflow-hidden"
-                onMouseEnter={() => {
+                onMouseOver={() => {
                   setIshover(true);
                   setIsHoverSetProduct(product.id);
                 }}
@@ -243,6 +248,7 @@ const Category = () => {
                               alt={`Product ${index}`}
                               className="w-full h-32 sm:h-44 object-contain"
                               loading="lazy"
+                              onClick={()=>dispatch(getSelectProductId(product.id))}
                             />
                           </div>
                         ))}
@@ -259,7 +265,7 @@ const Category = () => {
                 </div>
 
                 {isHoverSetProduct === product.id && isHover ? (
-                  <div className="p-2 sm:p-4">
+                  <div className="p-3 none">
                     <div className="rounded-full cursor-pointer text-center px-1">
                       {wishlist?.some((item) => item.id === product.id) ? (
                         <div className="border flex px-20 p-1 justify-center items-center w-full">
@@ -281,23 +287,12 @@ const Category = () => {
                       )}
                     </div>
 
-                    <div className="flex justify-start text-xs py-3 text-gray-600">
+                    <div className="flex justify-start text-xs pt-3 text-gray-600">
                       <span>Category: {product.category}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                        ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
-                      </span>
-                      <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                        ${parseInt(product.price)}
-                      </span>
-                      <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
-                        ({parseInt(product.discountPercentage)}% off)
-                      </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-2 sm:p-4">
+                  <div className="p-2 block sm:p-[11px]">
                     <Link to={`/productsdetail/${product.id}`}>
                       <h2 className="text-xs capitalize sm:text-sm font-bold line-clamp-1 text-gray-800">
                         {product.title}
@@ -306,20 +301,27 @@ const Category = () => {
                         {product.description}
                       </p>
                     </Link>
-                    <div className="flex items-center">
-                      <span className="text-[10px] sm:text-sm font-bold text-gray-800">
-                        ${parseInt(product.price - ((product.price * product.discountPercentage) / 100))}
-                      </span>
-                      <span className="font-semibold text-[10px] sm:text-xs mx-1 sm:mx-2 line-through text-slate-900">
-                        ₹{parseInt(product.price)}
-                        
-                      </span>
-                      <span className="text-[8px] sm:text-xs leading-relaxed text-orange-300">
-                        ({parseInt(product.discountPercentage)}% off)
-                      </span>
-                    </div>
+
                   </div>
                 )}
+                <div className="pl-3 mb-2 sm:mb-5 flex items-center justify-between">
+                  <p>
+                    <span className="text-[9px] sm:text-sm font-bold leading-relaxed">
+                      ${(product.price - (product.price * (product.discountPercentage / 100))).toFixed(2)}
+
+                    </span>
+                    {product.discountPercentage >= 1 && (
+                      <>
+                        <span className="font-semibold text-[9px] sm:text-xs mx-2 line-through text-gray-400">
+                          ${(product.price)}
+                        </span>
+                        <span className="text-[8px] leading-relaxed   sm:text-xs sm:font-bold text-orange-300">
+                          ({(product.discountPercentage)}% off)
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

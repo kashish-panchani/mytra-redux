@@ -1,20 +1,27 @@
-import { ADD_TO_CART, GET_CARTITEMS_COUNT, GET_CART_ITEMS, GET_PRODUCTS, GET_SORTED_PRODUCT, GET_WISHLIST_PRODUCTS, MOVE_TO_CART } from "../constants";
+import { ADD_TO_CART, FETCH_PRODUCTS_LOADING, GET_CARTITEMS_COUNT, GET_CART_ITEMS, GET_PRODUCT, GET_PRODUCTS, GET_SELECT_PRODUCT_ID, GET_SORTED_PRODUCT, GET_WISHLIST_PRODUCTS, MOVE_TO_CART } from "../constants";
 const initialState = {
     products: [],
     wishlist: [],
+    product: {},
     sortedProduct: [],
     cartItems: JSON.parse(localStorage.getItem("cartItems")) || [],
     cartItemsCount: 0,
+    selectedProductId: null,
+    isFetchProductsLoading: false
 };
 
 const Reducer = (state = initialState, action) => {
     const { payload } = action
     switch (action.type) {
         case GET_PRODUCTS:
-            console.log("action:::::::", action)
             return {
                 ...state,
                 products: payload,
+            };
+        case GET_PRODUCT:
+            return {
+                ...state,
+                product: payload,
             };
         case GET_WISHLIST_PRODUCTS:
             return {
@@ -44,7 +51,6 @@ const Reducer = (state = initialState, action) => {
         case ADD_TO_CART:
             const isAlreadyInCart = state?.cartItems?.some((item) => item?.id === payload?.id);
             const productWithQuantity = { ...payload, quantity: 1, checked: true };
-            console.log("payloadaddtocar", payload);
             if (!isAlreadyInCart) {
                 const updatedCartItems = [...state.cartItems, productWithQuantity];
                 localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
@@ -54,9 +60,7 @@ const Reducer = (state = initialState, action) => {
                     cartItemsCount: state.cartItemsCount + 1
                 };
             }
-
             return state;
-
         case MOVE_TO_CART:
 
             const isInCart = state.cartItems.some((item) => item.id === payload.id);
@@ -78,6 +82,17 @@ const Reducer = (state = initialState, action) => {
                 return { ...state, cartItems: updatedCartItems };
             }
 
+        case GET_SELECT_PRODUCT_ID:
+            return {
+                ...state,
+                selectedProductId: payload
+            }
+
+        case FETCH_PRODUCTS_LOADING:
+            return {
+                ...state,
+                isFetchProductsLoading: payload
+            }
         default:
 
             return state;

@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import ProductItems from "./ProductItems";
 import useToast from "../hook/useToast";
 import { useDispatch, useSelector } from "react-redux";
-import { getProducts, getSortedProduct, getWishlistProduct } from "../redux/actions";
+import { fetchProducts, getProducts, getSortedProduct, getWishlistProduct } from "../redux/actions";
+import Spinner from "../Spinner";
 
 const SearchProduct = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -13,7 +14,7 @@ const SearchProduct = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { success, error } = useToast();
   const dispatch = useDispatch()
-  const { products ,wishlist ,sortedProduct} = useSelector(state => state.Reducer)
+  const { products ,wishlist ,sortedProduct,isFetchProductsLoading} = useSelector(state => state.Reducer)
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -34,13 +35,8 @@ const SearchProduct = () => {
     setIsLoggedIn(loggedIn);
   }, []);
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch(`https://dummyjson.com/products?limit=0`);
-      const data = await response.json();
-      dispatch(getProducts(data.products))
-    };
-    fetchData();
-  }, []);
+    dispatch(fetchProducts());
+  }, [dispatch]);
   useEffect(() => {
     if (filteredProducts.length > 0) {
       dispatch(getSortedProduct([...filteredProducts]))
@@ -124,7 +120,9 @@ const SearchProduct = () => {
       }
     }
   };
-
+  if (isFetchProductsLoading) {
+    return <Spinner />
+  }
   return (
     <div>
       <div className="container mx-auto">

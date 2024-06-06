@@ -1,31 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Slider from "react-slick";
 import { settings } from "../Constants/ProductSlider";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart, getCartItemsCount, getProducts, getWishlistProduct } from "../redux/actions";
+import { addToCart, fetchProduct, getCartItemsCount, getWishlistProduct } from "../redux/actions";
+import Spinner from "../Spinner";
 
 const ProductsDetail = () => {
-  const { id } = useParams();
+  const { id: productId } = useParams();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const navigate = useNavigate();
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
 
- const {products,wishlist,cartItems}= useSelector(state=>state.Reducer)
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-    const fetchProductDetails = async () => {
-      const response = await fetch(`https://dummyjson.com/products/${id}`);
-      const data = await response.json();
-      dispatch(getProducts(data))
-    };
-    useEffect(() => {
-      dispatch(getCartItemsCount(cartItems?.length))
-    }, [dispatch]);
+  const { products, product: foundProduct, wishlist, cartItems, selectedProductId, isFetchProductsLoading } = useSelector(state => state.Reducer)
+  localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+
   useEffect(() => {
-    fetchProductDetails();
-  }, [id]);
+    if (foundProduct) {
+      if (foundProduct?.id !== selectedProductId) {
+
+        dispatch(fetchProduct({ productId }));
+      } 
+    }
+  }, [productId]);
+
+  useEffect(() => {
+    dispatch(getCartItemsCount(cartItems?.length))
+  }, []);
 
   useEffect(() => {
     const savedWishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
@@ -78,9 +82,14 @@ const ProductsDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  if (!products) {
-    return <h1>error</h1>;
+
+  if (isFetchProductsLoading) {
+    return <Spinner />
   }
+  if (!products) {
+    return <h1>Error</h1>;
+  }
+
 
   return (
     <>
@@ -102,7 +111,7 @@ const ProductsDetail = () => {
             {isMobile ? (
               <div className="h-[147px] sm:h-[194px] overflow-hidden">
                 <Slider {...settings} className="h-32 sm:h-44">
-                  {products?.images?.map((image, index) => (
+                  {foundProduct?.images?.map((image, index) => (
                     <div key={index}>
                       <img
                         src={image}
@@ -114,7 +123,7 @@ const ProductsDetail = () => {
                 </Slider>
               </div>
             ) : (
-              products?.images?.map((image, index) => (
+              foundProduct?.images?.map((image, index) => (
                 <div
                   key={index}
                   className="w-full xl:w-[350px] xl:h-[350px] lg:w-[290px] lg:h-[290px] md:w-[200px] md:h-[200px] border "
@@ -130,55 +139,55 @@ const ProductsDetail = () => {
           </div>
         </div>
 
-        <div className="flex flex-col px-4 sm:px-16 gap-3 xl:gap-5 lg:gap-4 md:gap-2 sm:gap-3 md:px-0 py-5 md:py-20 xl:w-2/3  md:w-[41%]">
+        <div className="flex flex-col px-4 sm:px-16 gap-3 xl:gap-5 lg:gap-4 md:gap-5 sm:gap-3 md:px-0 py-5 md:py-20 xl:w-2/3  md:w-[41%]">
           <div className="flex flex-col gap-2  xl:gap-5 lg:gap-4 md:gap-3 sm:gap-3 ">
             <h1 className="xl:text-3xl lg:text-2xl md:text-xl sm:text-xl text-lg  font-bold">
-              {products.title}
+              {foundProduct?.title}
             </h1>
             <h1 className="text-gray-400 xl:text-xl lg:text-lg md:text-sm sm:text-base text-sm font-normal">
-              {products.category}
+              {foundProduct?.category}
             </h1>
             <h1 className="text-gray-400 xl:text-xl lg:text-lg md:text-sm sm:text-sm text-sm font-normal">
-              {products.description}
+              {foundProduct?.description}
             </h1>
             <p className="text-gray-400 xl:text-xl lg:text-lg md:text-sm sm:text-sm text-sm leading-relaxed font-normal">
-              {products.brand}
+              {foundProduct?.brand}
             </p>
             <div className="border border-gary-200 w-14 text-xs    flex items-center font-bold justify-evenly">
-              {products.rating}{" "}
+              {foundProduct?.rating}{" "}
               <i className="fa-solid fa-star mt-1 text-xs text-teal-500"></i>
             </div>
             <hr />
           </div>
 
-          <div className="flex items-center my-1 xl:text-2xl   font-bold text-black">
-            <p className="xl:text-2xl lg:text-lg md:text-sm sm:text-sm text-xs font-bold">
-              $
-              {parseInt(products.price -
-                (
-                  (products.price * products.discountPercentage) /
-                  100
-                ))}
-            </p>
-            <p className="text-xs xl:text-xl lg:text-base md:text-sm sm:text-sm opacity-40 font-normal px-2 leading-relaxed line-through">
-              ${parseInt(products.price)}
-            </p>
-            <span className="opacity-40 text-xs  xl:text-xl lg:text-sm  md:text-sm sm:text-sm font-normal">
-              {" "}
-              MRP
-            </span>{" "}
-            <p className=" text-xs xl:text-lg leading-relaxed lg:text-sm md:text-sm sm:text-sm font-bold px-2 text-red-400">
-              {parseInt(products.discountPercentage)}% off
+          <div className=" flex items-center my-1 xl:text-2xl  font-bold text-black">
+            <p>
+              <span className="xl:text-2xl lg:text-lg md:text-sm sm:text-sm text-xs font-bold">
+                ${(foundProduct?.price - (foundProduct?.price * (foundProduct?.discountPercentage / 100))).toFixed(2)}
+
+              </span>
+              {foundProduct?.discountPercentage >= 1 && (
+                <>
+                  <span className="text-xs xl:text-xl lg:text-base md:text-sm sm:text-sm opacity-40 font-normal px-2 leading-relaxed line-through">
+                    ${(foundProduct?.price)}
+                  </span>
+                  <span className=" text-xs xl:text-lg leading-relaxed lg:text-sm md:text-sm sm:text-sm font-bold px-2 text-red-400">
+                    ({(foundProduct?.discountPercentage)}% off)
+                  </span>
+                </>
+              )}
             </p>
           </div>
-          <div>
+          {foundProduct?.stock < 5 && (
             <p className="text-sm xl:text-xl lg:text-lg md:text-sm sm:text-base leading-relaxed ">
               <label htmlFor="" className="text-teal-600 font-semibold">
                 In stock :{" "}
               </label>
-              {products.stock}
+              {foundProduct?.stock}
             </p>
-          </div>
+          )}
+
+
           <div className="text-teal-600 font-bold text-sm xl:text-xl lg:text-base md:text-sm sm:text-sm ">
             inclusive of all taxes
           </div>
@@ -189,10 +198,10 @@ const ProductsDetail = () => {
               onClick={() => {
                 localStorage.setItem("cartItems", JSON.stringify(cartItems));
 
-                dispatch(addToCart(products))
+                dispatch(addToCart(foundProduct))
               }}
             >
-              {cartItems?.some((item) => item?.id === products?.id) ? (
+              {cartItems?.some((item) => item?.id === foundProduct?.id) ? (
                 <Link to="/cart" className="text-white">
                   GO TO CART <i className="fa-solid fa-arrow-right ml-1"></i>
                 </Link>
@@ -201,7 +210,7 @@ const ProductsDetail = () => {
               )}
             </button>
 
-            {wishlist?.some((item) => item.id === products.id) ? (
+            {wishlist?.some((item) => item.id === foundProduct?.id) ? (
               <div className="text-[10px] xl:text-base cursor-not-allowed flex justify-center items-center py-1   lg:text-sm md:text-xs sm:text-xs rounded-none sm:px-4  md:py-3 md:px-4 lg:h-16 font-bold  border flex-1 text-center mr-3 w-32">
                 <i className="fa fa-heart sm:text-base  text-rose-500"></i>
                 <span className=" ml-1 font-bold">WISHLISTED</span>
@@ -209,7 +218,7 @@ const ProductsDetail = () => {
             ) : (
               <div
                 className="text-[10px] xl:text-base  flex justify-center items-center lg:text-sm md:text-xs sm:text-xs rounded-none sm:px-4  md:py-3 md:px-4 lg:h-16 font-bold  border flex-1 text-center mr-3 w-32"
-                onClick={(e) => whishlistbtn(products.id, e)}
+                onClick={(e) => whishlistbtn(foundProduct?.id, e)}
               >
                 <i className="fa-regular fa-heart sm:text-sm"></i>
                 <span className=" ml-1 font-bold">WISHLIST</span>

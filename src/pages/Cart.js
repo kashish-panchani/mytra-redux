@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useToast from "../hook/useToast";
 import { useDispatch, useSelector } from "react-redux";
-import { getCartItems } from "../redux/actions";
+import { getCartItems, getSelectProductId } from "../redux/actions";
 
 const Cart = () => {
   const [itemToRemove, setItemToRemove] = useState(null);
@@ -16,20 +16,18 @@ const Cart = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  console.log("cartItems::", cartItems)
+ 
   useEffect(() => {
     const count = cartItems?.filter((item) => item?.checked).length;
     setSelectedItemCount(count);
     setSelectAll(count === cartItems?.length);
   }, [cartItems, setSelectedItemCount]);
 
-
   useEffect(() => {
     const savedCartItems = localStorage.getItem("cartItems");
     if (savedCartItems) {
       const parsedCartItems = JSON.parse(savedCartItems);
       dispatch(getCartItems(parsedCartItems))
-
     }
   }, []);
 
@@ -46,7 +44,6 @@ const Cart = () => {
 
   const removeFromCart = (productsToRemove) => {
     let updatedCartItems;
-    console.log("productsToRemove", productsToRemove);
     if (Array.isArray(productsToRemove)) {
       updatedCartItems = cartItems?.filter(
         (item) => !productsToRemove.some((product) => product.id === item.id)
@@ -65,7 +62,6 @@ const Cart = () => {
     const selectedItemsToRemove = cartItems?.filter((item) => item?.checked);
     const updatedCartItems = cartItems?.filter((item) => !item?.checked);
     dispatch(getCartItems(updatedCartItems))
-    console.log("selectedItemsToRemove", selectedItemsToRemove);
     removeFromCart(selectedItemsToRemove);
     success("Selected items removed from cart");
     closeClearModal();
@@ -233,37 +229,49 @@ const Cart = () => {
                       onChange={() => handleItemCheckboxChange(item?.id)}
                       className="absolute mt-5 sm:mt-0 sm:p-1 cursor-pointer"
                     />
+                     <Link to={`/productsdetail/${item?.id}`}>
                     <img
                       src={item?.thumbnail}
                       alt="product-image"
                       className="w-[100px] h-[100px] xl:w-44 lg:w-36 mt-5 sm:mt-0 md:w-32 sm:w-40 object-cover sm:object-contain xl:h-44 lg:h-36 md:h-32 sm:h-40"
+                      onClick={()=>dispatch(getSelectProductId(item.id))}
                     />
+                    </Link>
 
                     <div className="ml-4 flex md:w-[70%] gap- sm:w-[66%] w-[100%] sm:justify-between">
-                      <div className="mt-6 sm:mt-0">
-                        <Link to={`/productsdetail/${item?.id}`}>
-                          <h2 className="text-[12px] sm:text-base font-semibold text-gray-600">
+                      <div className="mt-3">
+                       
+                          <h2 className="text-[12px] sm:text-base font-semibold text-gray-600" >
                             {item?.title}
+                            
                           </h2>
-                        </Link>
+                
                         <p className="my-2 text-[12px] sm:text-[13px] text-gray-700">
                           {item?.category}
                         </p>
                         <p className="my-2 text-[11px] sm:text-[13px] line-clamp-1 text-gray-700">
                           {item?.description}
                         </p>
-                        <div className="flex justify-between items-center">
-                          <span className="flex justify-center items-center sm:text-[11px] text-[11px] font-bold text-gray-800">
-                            ${parseInt(item?.price - ((item?.price * item?.discountPercentage) / 100))}
-                            <p className="text-[10px] mx-1 sm:text-[11px] sm:mx-2 line-through text-slate-400">
-                              ${parseInt(item?.price)}
-                            </p>
-                            <p className="text-[9px] sm:text-[11px] leading-relaxed text-orange-300">
-                              ({parseInt(item?.discountPercentage)}% off)
-                            </p>
-                          </span>
-                        </div>
 
+
+                        <div className=" sm:mb-3 flex items-center justify-between">
+                          <p>
+                            <span className="text-[10px] sm:text-sm font-bold leading-relaxed">
+                              ${(item.price - (item.price * (item.discountPercentage / 100))).toFixed(2)}
+
+                            </span>
+                            {item.discountPercentage >= 1 && (
+                              <>
+                                <span className="font-semibold text-[10px] sm:text-xs mx-2 line-through text-gray-400">
+                                  ${(item.price)}
+                                </span>
+                                <span className="text-[10px] sm:text-xs sm:mt-0  mt-4 leading-relaxed sm:font-bold text-orange-300">
+                                  ({(item.discountPercentage)}% off)
+                                </span>
+                              </>
+                            )}
+                          </p>
+                        </div>
                         <div className="flex items-center mt-2 border-gray-100">
                           <span
                             className={`border bg-slate-200 w-3 h-4 text-[10px] px-1 xl:px-2 xl:w-6 xl:h-6 xl:text-sm lg:w-5 lg:h-5 lg:px-2 lg:text-[13px] md:w-4 md:h-4 md:px-1 md:text-[10px] sm:w-3 sm:h-5 sm:px-2 sm:text-[12px] hover:bg-slate-100  ${item?.quantity <= 1 ? "cursor-not-allowed" : "cursor-pointer"
@@ -321,7 +329,7 @@ const Cart = () => {
             <div className="my-1 sm:my-0 sm:mt-6 h-full gap-2 grid grid-cols-1 border bg-white py-6 px-4 md:mt-0 md:w-80">
               <div className="mb-2 flex justify-between">
                 <p className="text-gray-700  font-bold">Subtotal</p>
-                <p className="text-gray-700 text-sm">₹
+                <p className="text-gray-700 text-sm">$
                   {cartItems?.reduce(
                     (total, item) =>
                       total +
@@ -345,7 +353,7 @@ const Cart = () => {
 
                 <p className="mb-1 text-sm font-bold">
                   {" "}
-                  ₹
+                  $
                   {cartItems?.reduce(
                     (total, item) =>
                       total +
